@@ -1,8 +1,9 @@
 import React from "react";
 
-function CountryCard({ name, flag }) {
+function CountryCard({ name, flag, className }) {
   return (
     <div
+      className={`countryCard ${className}`}
       style={{
         display: "flex",
         border: "1px solid gray",

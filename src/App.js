@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import CountryCard from "./components/countryCards";
-import "./App.css";
+
 
 function App() {
   const [countries, setCountries] = useState([]);
@@ -8,7 +8,8 @@ function App() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    fetch("https://countries-search-data-prod-812920491762.asia-south1.run.app/countries")
+    const controller = new AbortController(); // Allow request cancellation
+    fetch("https://countries-search-data-prod-812920491762.asia-south1.run.app/countries", { signal: controller.signal })
       .then((response) => {
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
@@ -20,6 +21,8 @@ function App() {
         console.error("Error fetching data:", error);
         setError("Failed to fetch country data. Please try again later.");
       });
+
+    return () => controller.abort(); // Cleanup on component unmount
   }, []);
 
   const filteredCountries = countries.filter((country) =>
@@ -45,13 +48,18 @@ function App() {
         }}
       >
         {error ? (
-          <p>{error}</p>
+          <p className="error">{error}</p>
         ) : filteredCountries.length > 0 ? (
           filteredCountries.map((country) => (
-            <CountryCard key={country.common} name={country.common} flag={country.png} />
+            <CountryCard
+              key={country.common}
+              className="countryCard"
+              name={country.common}
+              flag={country.png}
+            />
           ))
         ) : (
-          <p>No countries found.</p>
+          <p className="noResults">No countries found.</p>
         )}
       </div>
     </div>
