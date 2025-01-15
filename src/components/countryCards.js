@@ -11,16 +11,17 @@ function CountryCard({ name, flag }) {
         height: "250px",
         flexDirection: "column",
         alignItems: "center",
-        padding: "10px",
+        justifyContent: "center",
         textAlign: "center",
+        padding: "10px",
       }}
     >
       <img
         src={flag}
-        alt={`The name of flag is +${name}`}
-        style={{ width: "100px", height: "100px" }}
+        alt={`Flag of ${name}`}
+        style={{ width: "100px", height: "100px", marginBottom: "10px" }}
       />
-      <h2>{name}</h2>
+      <h2 style={{ fontSize: "18px", margin: "0" }}>{name}</h2>
     </div>
   );
 }
