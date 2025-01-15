@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import CountryCard from "./components/countryCards";
-
+import "./App.css";
 
 function App() {
   const [countries, setCountries] = useState([]);
@@ -8,21 +8,36 @@ function App() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    const controller = new AbortController(); // Allow request cancellation
-    fetch("https://countries-search-data-prod-812920491762.asia-south1.run.app/countries", { signal: controller.signal })
-      .then((response) => {
+    const controller = new AbortController(); // Create a controller
+    const signal = controller.signal;
+
+    const fetchData = async () => {
+      try {
+        const response = await fetch(
+          "https://countries-search-data-prod-812920491762.asia-south1.run.app/countries",
+          { signal }
+        );
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
-        return response.json();
-      })
-      .then((data) => setCountries(data))
-      .catch((error) => {
-        console.error("Error fetching data:", error);
-        setError("Failed to fetch country data. Please try again later.");
-      });
+        const data = await response.json();
+        setCountries(data);
+      } catch (err) {
+        if (err.name === "AbortError") {
+          console.log("Fetch aborted");
+        } else {
+          console.error("Error fetching data:", err);
+          setError("Failed to fetch country data. Please try again later.");
+        }
+      }
+    };
 
-    return () => controller.abort(); // Cleanup on component unmount
+    fetchData();
+
+    // Cleanup: Abort the request if the component unmounts
+    return () => {
+      controller.abort();
+    };
   }, []);
 
   const filteredCountries = countries.filter((country) =>
