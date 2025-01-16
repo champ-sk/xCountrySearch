@@ -3,7 +3,7 @@ import React from "react";
 function CountryCard({ name, flag, className }) {
   return (
     <div
-      className={`countryCard ${className}`}
+      className="countryCard"
       style={{
         display: "flex",
         border: "1px solid gray",
