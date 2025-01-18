@@ -1,81 +1,64 @@
-import React, { useState, useEffect } from "react";
-import CountryCard from "./components/countryCards";
+import logo from "./logo.svg";
 import "./App.css";
+import { useEffect, useState } from "react";
 
 function App() {
   const [countries, setCountries] = useState([]);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [error, setError] = useState(null);
+  const [filtered, setFiltered] = useState([]);
+  const [search, setSearch] = useState("");
+
+  const handleChange = (e) => {
+    setSearch(e.target.value);
+  };
 
   useEffect(() => {
-    const controller = new AbortController(); // Create a controller
-    const signal = controller.signal;
-
     const fetchData = async () => {
       try {
-        const response = await fetch(
-          "https://countries-search-data-prod-812920491762.asia-south1.run.app/countries",
-          { signal }
-        );
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const data = await response.json();
+        const resp = await fetch("https://restcountries.com/v3.1/all");
+        const data = await resp.json();
         setCountries(data);
       } catch (err) {
-        if (err.name === "AbortError") {
-          console.log("Fetch aborted");
-        } else {
-          console.error("Error fetching data:", err);
-          setError("Failed to fetch country data. Please try again later.");
-        }
+        console.log(err);
       }
     };
-
     fetchData();
-
-    // Cleanup: Abort the request if the component unmounts
-    return () => {
-      controller.abort();
-    };
   }, []);
 
-  const filteredCountries = countries.filter((country) =>
-    country?.common?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  useEffect(() => {
+    const data = countries.filter((country) =>
+      country.name.common.toLowerCase().includes(search.toLowerCase())
+    );
+    setFiltered(data);
+  }, [search]);
 
+  console.log(countries);
   return (
-    <div className="App">
-      <input
-        type="text"
-        placeholder="Search for a country..."
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-        style={{ margin: "20px", padding: "10px", fontSize: "16px" }}
-      />
-      <div
-        className="countryList"
-        style={{
-          display: "flex",
-          flexWrap: "wrap",
-          gap: "10px",
-          justifyContent: "center",
-        }}
-      >
-        {error ? (
-          <p className="error">{error}</p>
-        ) : filteredCountries.length > 0 ? (
-          filteredCountries.map((country) => (
-            <CountryCard
-              key={country.common}
-              className="countryCard"
-              name={country.common}
-              flag={country.png}
-            />
-          ))
-        ) : (
-          <p className="noResults">No countries found.</p>
-        )}
+    <div>
+      <div className="inp">
+        <input
+          type="text"
+          placeholder="Enter a country"
+          onChange={(e) => handleChange(e)}
+        />
+      </div>
+      <div className="App">
+        {search === ""
+          ? countries.map((country) => {
+              return (
+                <div className="countryCard">
+                  <img src={country.flags.png} alt={country.flag}></img>
+                  <p>{country.name.common}</p>
+                </div>
+              );
+            })
+          : filtered.map((country) => {
+              return (
+                <div className="countryCard">
+                  <img src={country.flags.png} alt={country.flag}></img>
+                  <p>{country.name.common}</p>
+                </div>
+              );
+            })}
       </div>
     </div>
   );
